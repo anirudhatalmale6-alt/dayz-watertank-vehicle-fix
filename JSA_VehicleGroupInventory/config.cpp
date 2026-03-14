@@ -5,8 +5,7 @@ class CfgPatches
         units[] = {};
         weapons[] = {};
         requiredVersion = 0.1;
-        // FIX: Added HM_Vehicle_Claim and LBmaster dependencies
-        requiredAddons[] = {"DZ_Data", "HM_Vehicle_Claim_Scripts", "LBmaster_Groups"};
+        requiredAddons[] = {"DZ_Data", "HM_Core_Module", "HM_Vehicle_Claim", "LBmaster_Core", "LBmaster_Groups"};
     };
 };
 

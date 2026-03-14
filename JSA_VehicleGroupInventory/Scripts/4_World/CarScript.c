@@ -1,7 +1,7 @@
 modded class CarScript
 {
-    // No need to sync OwnerSteamID ourselves - HM Vehicle Claim already
-    // syncs it to all clients. We just read it directly.
+    // HM Vehicle Claim already adds 'string OwnerSteamID' to CarScript
+    // and syncs it to all clients. We just read it directly.
 
     bool JSA_IsVehicleClaimed()
     {
@@ -27,8 +27,8 @@ modded class CarScript
         if (playerUID == OwnerSteamID)
             return true;
 
-        // Admin bypass
-        if (LBAdmins.HasPermission("groups.build.enemy", identity))
+        // Admin bypass - LBAdmins.Get().HasPermission()
+        if (LBAdmins.Get().HasPermission("groups.build.enemy", identity))
             return true;
 
         // Check if the player and the vehicle owner are in the same LBMaster group
@@ -43,7 +43,7 @@ modded class CarScript
         return false;
     }
 
-    // --- Client-side: Hide cargo from non-group players ---
+    // Client-side: Hide cargo from non-group players
     override bool CanDisplayCargo()
     {
         PlayerBase player = PlayerBase.Cast(GetGame().GetPlayer());
@@ -53,7 +53,7 @@ modded class CarScript
         return super.CanDisplayCargo();
     }
 
-    // --- Client-side: Hide attachment slots from non-group players ---
+    // Client-side: Hide attachment slots from non-group players
     override bool CanDisplayAttachmentSlot(int slot_id)
     {
         PlayerBase player = PlayerBase.Cast(GetGame().GetPlayer());
@@ -63,7 +63,7 @@ modded class CarScript
         return super.CanDisplayAttachmentSlot(slot_id);
     }
 
-    // --- Prevent non-group players from removing attachments ---
+    // Prevent non-group players from removing attachments
     override bool CanReleaseAttachment(EntityAI attachment)
     {
         PlayerBase player = PlayerBase.Cast(GetGame().GetPlayer());
@@ -73,7 +73,7 @@ modded class CarScript
         return super.CanReleaseAttachment(attachment);
     }
 
-    // --- Prevent non-group players from putting items in ---
+    // Prevent non-group players from putting items in
     override bool CanReceiveItemIntoCargo(EntityAI item)
     {
         PlayerBase player = PlayerBase.Cast(GetGame().GetPlayer());
@@ -83,7 +83,7 @@ modded class CarScript
         return super.CanReceiveItemIntoCargo(item);
     }
 
-    // --- Prevent non-group players from attaching items ---
+    // Prevent non-group players from attaching items
     override bool CanReceiveAttachment(EntityAI attachment, int slotId)
     {
         PlayerBase player = PlayerBase.Cast(GetGame().GetPlayer());
