@@ -26,15 +26,10 @@ class CfgMods
 		extra       = 0;
 		type        = "mod";
 
-		dependencies[] = {"Game", "World", "Mission"};
+		dependencies[] = {"World", "Mission"};
 
 		class defs
 		{
-			class gameScriptModule
-			{
-				value   = "";
-				files[] = {"JSA_WaterTank/scripts/3_Game"};
-			};
 			class worldScriptModule
 			{
 				value   = "";
