@@ -51,13 +51,9 @@ class ActionFillBottleWaterTank extends ActionContinuousBase
 
 	override void OnFinishProgressServer(ActionData action_data)
 	{
-		ItemBase target_item = ItemBase.Cast(action_data.m_Target.GetObject());
-		Param1<float> nacdata = Param1<float>.Cast(action_data.m_ActionComponent);
-
-		if (nacdata)
+		if (action_data.m_MainItem)
 		{
-			float water_amount = nacdata.param1;
-			Liquid.FillContainerEnviro(action_data.m_MainItem, LIQUID_WATER, water_amount);
+			Liquid.FillContainerEnviro(action_data.m_MainItem, LIQUID_WATER, action_data.m_MainItem.GetQuantityMax() * 0.25);
 		}
 	}
 };
