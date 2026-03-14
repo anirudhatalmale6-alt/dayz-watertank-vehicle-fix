@@ -10,7 +10,6 @@ class ActionFillBottleWaterTank extends ActionContinuousBase
 {
 	void ActionFillBottleWaterTank()
 	{
-		m_CallbackClass = ActionCB;
 		m_CommandUID = DayZPlayerConstants.CMD_ACTIONFB_FILLBOTTLEWELL;
 		m_FullBody = true;
 		m_StanceMask = DayZPlayerConstants.STANCEMASK_CROUCH;
