@@ -1,41 +1,11 @@
 modded class CarScript
 {
-    // Synced copy of HM Vehicle Claim's owner Steam ID
-    protected string JSA_OwnerUID;
-    protected float JSA_SyncTimer;
-
-    void CarScript()
-    {
-        RegisterNetSyncVariableString("JSA_OwnerUID", 0, 30);
-    }
-
-    // Server-side: mirror HM's owner ID into our synced variable every 3 seconds
-    override void EOnFrame(IEntity other, float timeSlice)
-    {
-        super.EOnFrame(other, timeSlice);
-
-        #ifdef SERVER
-        JSA_SyncTimer += timeSlice;
-        if (JSA_SyncTimer >= 3.0)
-        {
-            JSA_SyncTimer = 0;
-
-            // --- FIX: Access HM Vehicle Claim's owner variable safely ---
-            // HM Vehicle Claim adds OwnerSteamID to CarScript.
-            // If the variable name is different in your HM version, update it here.
-            string current = OwnerSteamID;
-            if (current != JSA_OwnerUID)
-            {
-                JSA_OwnerUID = current;
-                SetSynchDirty();
-            }
-        }
-        #endif
-    }
+    // No need to sync OwnerSteamID ourselves - HM Vehicle Claim already
+    // syncs it to all clients. We just read it directly.
 
     bool JSA_IsVehicleClaimed()
     {
-        return JSA_OwnerUID != "" && JSA_OwnerUID != "0";
+        return OwnerSteamID != "" && OwnerSteamID != "0";
     }
 
     bool JSA_CanAccessVehicle(PlayerBase player)
@@ -54,25 +24,17 @@ modded class CarScript
         string playerUID = identity.GetId();
 
         // Owner always has access
-        if (playerUID == JSA_OwnerUID)
+        if (playerUID == OwnerSteamID)
             return true;
 
-        // --- FIX: Use correct LBMaster API ---
-        // Old (broken): LBMasterModule.GetInstance() -> does not exist
-        // Correct API:  LBGroupManager.Get() for group lookups
-        //               LBAdmins.HasPermission() for permission checks
-        //               player.GetLBGroup() for online player's group
-
-        // Admin bypass - check if player has admin override permission
+        // Admin bypass
         if (LBAdmins.HasPermission("groups.build.enemy", identity))
             return true;
 
         // Check if the player and the vehicle owner are in the same LBMaster group
-        // GetPlayersGroup works for both online and offline players by Steam ID
-        LBGroup ownerGroup = LBGroupManager.Get().GetPlayersGroup(JSA_OwnerUID);
+        LBGroup ownerGroup = LBGroupManager.Get().GetPlayersGroup(OwnerSteamID);
         if (ownerGroup)
         {
-            // For the current player, use GetLBGroup() which works on client side
             LBGroup playerGroup = player.GetLBGroup();
             if (playerGroup && playerGroup == ownerGroup)
                 return true;
@@ -111,7 +73,7 @@ modded class CarScript
         return super.CanReleaseAttachment(attachment);
     }
 
-    // --- Server-side: Prevent non-group players from putting items in ---
+    // --- Prevent non-group players from putting items in ---
     override bool CanReceiveItemIntoCargo(EntityAI item)
     {
         PlayerBase player = PlayerBase.Cast(GetGame().GetPlayer());
@@ -121,7 +83,7 @@ modded class CarScript
         return super.CanReceiveItemIntoCargo(item);
     }
 
-    // --- Server-side: Prevent non-group players from attaching items ---
+    // --- Prevent non-group players from attaching items ---
     override bool CanReceiveAttachment(EntityAI attachment, int slotId)
     {
         PlayerBase player = PlayerBase.Cast(GetGame().GetPlayer());
