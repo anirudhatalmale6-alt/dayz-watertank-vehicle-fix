@@ -5,7 +5,7 @@ class CfgPatches
 		units[]          = {"JSA_WaterTank_Kit", "JSA_WaterTank"};
 		weapons[]        = {};
 		requiredVersion  = 0.1;
-		requiredAddons[] = {"DZ_Data", "DZ_Gear_Medical", "MSP_Scripts"};
+		requiredAddons[] = {"DZ_Data", "DZ_Gear_Medical", "DZ_Gear_Drinks", "MSP_Scripts"};
 	};
 };
 

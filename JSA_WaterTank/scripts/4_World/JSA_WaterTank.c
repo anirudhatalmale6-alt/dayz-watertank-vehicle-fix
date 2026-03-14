@@ -2,19 +2,10 @@ class JSA_WaterTank_Kit extends Msp_Kit
 {
 };
 
-// Custom fill action for the water tank
-// ActionFillBottleBase doesn't work reliably on Container_Base objects
-// because its conditions are designed for BuildingSuper (vanilla wells).
-// This creates a simple wrapper that works on our tank.
-class ActionFillBottleWaterTank extends ActionContinuousBase
+class ActionFillBottleWaterTank extends ActionSingleUseBase
 {
 	void ActionFillBottleWaterTank()
 	{
-		m_CommandUID = DayZPlayerConstants.CMD_ACTIONFB_FILLBOTTLEWELL;
-		m_FullBody = true;
-		m_StanceMask = DayZPlayerConstants.STANCEMASK_CROUCH;
-		m_SpecialtyWeight = UASoftSkillsWeight.PRECISE_LOW;
-		m_LockTargetOnUse = false;
 		m_Text = "#fill";
 	}
 
@@ -26,35 +17,48 @@ class ActionFillBottleWaterTank extends ActionContinuousBase
 
 	override typename GetInputType()
 	{
-		return ContinuousInteractActionInput;
+		return InteractActionInput;
 	}
 
-	override bool HasProneException()
+	override bool HasTarget()
 	{
 		return true;
 	}
 
 	override bool ActionCondition(PlayerBase player, ActionTarget target, ItemBase item)
 	{
-		if (!item || item.IsFullQuantity())
+		if (!item)
+			return false;
+
+		if (item.IsFullQuantity())
 			return false;
 
 		Object targetObject = target.GetObject();
-		if (!targetObject || !targetObject.IsWell())
+		if (!targetObject)
 			return false;
 
-		if (!Liquid.CanFillContainer(item, LIQUID_WATER))
+		if (!targetObject.IsKindOf("JSA_WaterTank"))
 			return false;
 
 		return true;
 	}
 
-	override void OnFinishProgressServer(ActionData action_data)
+	override void OnExecuteServer(ActionData action_data)
 	{
 		if (action_data.m_MainItem)
 		{
-			Liquid.FillContainerEnviro(action_data.m_MainItem, LIQUID_WATER, action_data.m_MainItem.GetQuantityMax() * 0.25);
+			Liquid.FillContainerEnviro(action_data.m_MainItem, LIQUID_WATER, action_data.m_MainItem.GetQuantityMax());
 		}
+	}
+};
+
+// Register fill action on bottles/canteens so it appears when holding them near the water tank
+modded class Bottle_Base
+{
+	override void SetActions()
+	{
+		super.SetActions();
+		AddAction(ActionFillBottleWaterTank);
 	}
 };
 
