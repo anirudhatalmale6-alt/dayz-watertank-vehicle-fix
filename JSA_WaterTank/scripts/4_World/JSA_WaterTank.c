@@ -2,63 +2,23 @@ class JSA_WaterTank_Kit extends Msp_Kit
 {
 };
 
-class ActionFillBottleWaterTank extends ActionSingleUseBase
+// Extend the vanilla fill-bottle action to recognize our custom water tank.
+// ActionFillBottleBase is already registered on all vanilla bottles and canteens.
+// Its default condition only recognizes vanilla well classes (BuildingSuper).
+// This override adds JSA_WaterTank support so players can fill bottles at the tank.
+modded class ActionFillBottleBase
 {
-	void ActionFillBottleWaterTank()
-	{
-		m_Text = "#fill";
-	}
-
-	override void CreateConditionComponents()
-	{
-		m_ConditionItem = new CCINonRuined();
-		m_ConditionTarget = new CCTObject(UAMaxDistances.DEFAULT);
-	}
-
-	override typename GetInputType()
-	{
-		return InteractActionInput;
-	}
-
-	override bool HasTarget()
-	{
-		return true;
-	}
-
 	override bool ActionCondition(PlayerBase player, ActionTarget target, ItemBase item)
 	{
-		if (!item)
-			return false;
-
-		if (item.IsFullQuantity())
-			return false;
-
 		Object targetObject = target.GetObject();
-		if (!targetObject)
-			return false;
-
-		if (!targetObject.IsKindOf("JSA_WaterTank"))
-			return false;
-
-		return true;
-	}
-
-	override void OnExecuteServer(ActionData action_data)
-	{
-		if (action_data.m_MainItem)
+		if (targetObject && targetObject.IsKindOf("JSA_WaterTank"))
 		{
-			Liquid.FillContainerEnviro(action_data.m_MainItem, LIQUID_WATER, action_data.m_MainItem.GetQuantityMax());
+			if (item && !item.IsFullQuantity())
+				return true;
+			return false;
 		}
-	}
-};
 
-// Register fill action on bottles/canteens so it appears when holding them near the water tank
-modded class Bottle_Base
-{
-	override void SetActions()
-	{
-		super.SetActions();
-		AddAction(ActionFillBottleWaterTank);
+		return super.ActionCondition(player, target, item);
 	}
 };
 
@@ -95,6 +55,5 @@ class JSA_WaterTank extends Msp_Item
 
 		AddAction(ActionWashHandsWell);
 		AddAction(ActionDrinkWellContinuous);
-		AddAction(ActionFillBottleWaterTank);
 	}
 };
