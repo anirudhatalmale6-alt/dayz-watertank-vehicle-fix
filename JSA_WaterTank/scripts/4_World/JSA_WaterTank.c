@@ -20,6 +20,18 @@ modded class ActionFillBottleBase
 
 		return super.ActionCondition(player, target, item);
 	}
+
+	override void OnFinishProgressServer(ActionData action_data)
+	{
+		Object target = action_data.m_Target.GetObject();
+		if (target && target.IsKindOf("JSA_WaterTank") && action_data.m_MainItem)
+		{
+			Liquid.FillContainerEnviro(action_data.m_MainItem, LIQUID_WATER, action_data.m_MainItem.GetQuantityMax());
+			return;
+		}
+
+		super.OnFinishProgressServer(action_data);
+	}
 };
 
 class JSA_WaterTank extends Msp_Item
