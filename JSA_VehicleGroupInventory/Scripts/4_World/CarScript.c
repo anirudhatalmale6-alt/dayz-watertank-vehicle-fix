@@ -2,10 +2,18 @@ modded class CarScript
 {
     protected int JSA_OwnerHash;
     protected int JSA_PrevOwnerHash;
+    protected int JSA_DebugCounter;
 
     void CarScript()
     {
         RegisterNetSyncVariableInt("JSA_OwnerHash");
+    }
+
+    override void OnVariablesSynchronized()
+    {
+        super.OnVariablesSynchronized();
+        if (JSA_OwnerHash != 0)
+            Print("[JSA_Vehicle] CLIENT received hash: " + JSA_OwnerHash + " for " + GetType());
     }
 
     override void EEInit()
@@ -97,22 +105,32 @@ modded class CarScript
         if (!player)
             return false;
 
-        // Admin bypass
-        if (LBAdmins.Get().HasPermissionActive("groups.build.enemy", player))
-            return true;
+        // Get player Steam ID (try multiple methods for client/server compatibility)
+        string playerUID = "";
+        if (player.GetIdentity())
+            playerUID = player.GetIdentity().GetPlainId();
+        if (playerUID == "")
+            playerUID = player.GetMySteamId();
 
         // Owner check
-        string playerUID = player.GetMySteamId();
         if (playerUID != "" && playerUID.Hash() == JSA_OwnerHash)
             return true;
 
+        // Admin bypass - server only (LBAdmins may not be available on client)
+        if (GetGame().IsServer())
+        {
+            LBAdmins admins = LBAdmins.Get();
+            if (admins && admins.HasPermissionActive("groups.build.enemy", player))
+                return true;
+        }
+
         // Group check - is the vehicle owner in my group?
         LBGroup myGroup = player.GetLBGroup();
-        if (myGroup)
+        if (myGroup && myGroup.members)
         {
             foreach (LBGroupMember member : myGroup.members)
             {
-                if (member && member.steamid.Hash() == JSA_OwnerHash)
+                if (member && member.steamid != "" && member.steamid.Hash() == JSA_OwnerHash)
                     return true;
             }
         }
@@ -124,7 +142,20 @@ modded class CarScript
     {
         PlayerBase player = PlayerBase.Cast(GetGame().GetPlayer());
         if (player && !JSA_CanAccessVehicle(player))
+        {
+            // Debug: log denial periodically (every 100th check to avoid spam)
+            JSA_DebugCounter++;
+            if (JSA_DebugCounter % 100 == 1)
+            {
+                string uid = "";
+                if (player.GetIdentity())
+                    uid = player.GetIdentity().GetPlainId();
+                if (uid == "")
+                    uid = player.GetMySteamId();
+                Print("[JSA_Vehicle] CanDisplayCargo DENIED for " + uid + " on " + GetType() + " (ownerHash=" + JSA_OwnerHash + ")");
+            }
             return false;
+        }
 
         return super.CanDisplayCargo();
     }
