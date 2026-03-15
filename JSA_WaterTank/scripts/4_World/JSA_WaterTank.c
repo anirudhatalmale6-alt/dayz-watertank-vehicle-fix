@@ -290,6 +290,17 @@ class JSA_WaterTank extends Msp_Item
 		}
 	}
 
+	// --- Display ---
+	override string GetDisplayName()
+	{
+		string name = super.GetDisplayName();
+		float cap = JSA_WaterTankConfig.Get().tankCapacity;
+		int percent = 0;
+		if (cap > 0)
+			percent = Math.Round((m_JSA_WaterLevel / cap) * 100);
+		return name + " [" + percent.ToString() + "%]";
+	}
+
 	// --- Standard overrides ---
 	override bool CanPutInCargo(EntityAI parent)
 	{
