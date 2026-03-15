@@ -391,3 +391,16 @@ class JSA_WaterTank extends Msp_Item
 		AddAction(ActionWaterCropsFromTank);
 	}
 };
+
+// ===== REGISTER CUSTOM ACTIONS IN ENGINE =====
+// Actions MUST be registered in ActionConstructor for the DayZ action manager
+// to create instances. Without this, AddAction() has no effect.
+
+modded class ActionConstructor
+{
+	override void RegisterActions(TTypenameArray actions)
+	{
+		super.RegisterActions(actions);
+		actions.Insert(ActionWaterCropsFromTank);
+	}
+};

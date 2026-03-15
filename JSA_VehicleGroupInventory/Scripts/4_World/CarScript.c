@@ -3,6 +3,7 @@ modded class CarScript
     protected int JSA_OwnerHash;
     protected int JSA_PrevOwnerHash;
     protected int JSA_DebugCounter;
+    protected string JSA_LastDeniedSteamID;
 
     void CarScript()
     {
@@ -41,7 +42,8 @@ modded class CarScript
 
         if (GetGame().IsServer())
         {
-            GetGame().GetCallQueue(CALL_CATEGORY_SYSTEM).CallLater(JSA_SyncOwnerHash, 2000, true);
+            // Check every 1 second for faster claim reversal
+            GetGame().GetCallQueue(CALL_CATEGORY_SYSTEM).CallLater(JSA_SyncOwnerHash, 1000, true);
         }
     }
 
@@ -63,26 +65,37 @@ modded class CarScript
         if (m_OwnerSteamID != "" && m_OwnerSteamID != "0")
             newHash = m_OwnerSteamID.Hash();
 
-        // Debug: log on first sync and on changes
+        // Debug: log on changes
         if (JSA_PrevOwnerHash != newHash)
         {
             Print("[JSA_Vehicle] " + GetType() + " owner sync: m_OwnerSteamID=" + m_OwnerSteamID + " claimed=" + m_isVehicleClaimed + " hash=" + newHash);
         }
 
-        // Detect new claim: hash went from 0 to non-0
-        if (JSA_PrevOwnerHash == 0 && newHash != 0)
+        // EVERY cycle: if vehicle has an owner who is NOT in a group, reverse the claim
+        // This catches: initial solo claims, HM re-setting claims, player leaving their group
+        if (newHash != 0 && !JSA_IsClaimantInGroup(m_OwnerSteamID))
         {
-            // Check if the claimant is in a group
-            if (!JSA_IsClaimantInGroup(m_OwnerSteamID))
+            string deniedSteamID = m_OwnerSteamID;
+            Print("[JSA_Vehicle] Claim denied on " + GetType() + " - player " + deniedSteamID + " not in a group. Reversing.");
+
+            // Reverse the claim by clearing HM Vehicle Claim variables
+            m_OwnerSteamID = "";
+            m_isVehicleClaimed = false;
+            m_OwnerGUID = "";
+            m_isVehicleLocked = false;
+            newHash = 0;
+
+            // Notify the player (once per player per vehicle to avoid spam)
+            if (deniedSteamID != JSA_LastDeniedSteamID)
             {
-                Print("[JSA_Vehicle] Claim reversed - player " + m_OwnerSteamID + " not in a group");
-                // Player is not in a group - reverse the claim
-                m_OwnerSteamID = "";
-                m_isVehicleClaimed = false;
-                m_OwnerGUID = "";
-                m_isVehicleLocked = false;
-                newHash = 0;
+                JSA_LastDeniedSteamID = deniedSteamID;
+                JSA_NotifyNoGroup(deniedSteamID);
             }
+        }
+        else if (newHash != 0)
+        {
+            // Owner is in a group - reset denial tracking
+            JSA_LastDeniedSteamID = "";
         }
 
         JSA_PrevOwnerHash = newHash;
@@ -92,6 +105,25 @@ modded class CarScript
             JSA_OwnerHash = newHash;
             SetSynchDirty();
             Print("[JSA_Vehicle] Hash synced to clients: " + JSA_OwnerHash);
+        }
+    }
+
+    void JSA_NotifyNoGroup(string steamID)
+    {
+        array<Man> allPlayers = new array<Man>();
+        GetGame().GetPlayers(allPlayers);
+
+        foreach (Man man : allPlayers)
+        {
+            PlayerBase pb = PlayerBase.Cast(man);
+            if (pb && pb.GetIdentity() && pb.GetIdentity().GetPlainId() == steamID)
+            {
+                // Send action message to player's screen
+                Param1<string> msgParam = new Param1<string>("You must be in a group to claim a vehicle!");
+                GetGame().RPCSingleParam(this, ERPCs.RPC_USER_ACTION_MESSAGE, msgParam, true, pb.GetIdentity());
+                Print("[JSA_Vehicle] Sent no-group notification to " + steamID);
+                break;
+            }
         }
     }
 
