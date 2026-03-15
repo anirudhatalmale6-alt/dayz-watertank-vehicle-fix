@@ -1,4 +1,4 @@
-class JSA_Base_2F : HouseNoDestruct
+class JSA_Base_2F : House
 {
     void JSA_Base_2F() {}
 

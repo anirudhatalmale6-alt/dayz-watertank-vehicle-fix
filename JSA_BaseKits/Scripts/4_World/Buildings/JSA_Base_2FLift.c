@@ -1,4 +1,4 @@
-class JSA_Base_2FLift : HouseNoDestruct
+class JSA_Base_2FLift : House
 {
     void JSA_Base_2FLift() {}
 
