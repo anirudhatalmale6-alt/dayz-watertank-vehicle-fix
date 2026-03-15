@@ -130,12 +130,22 @@ modded class ActionWashHandsWell
 
 // ===== WATER CROPS ACTION =====
 
-class ActionWaterCropsFromTank extends ActionInteractBase
+class ActionWaterCropsFromTankCB : ActionContinuousBaseCB
+{
+	override void CreateActionComponent()
+	{
+		m_ActionData.m_ActionComponent = new CAContinuousTime(2);
+	}
+};
+
+class ActionWaterCropsFromTank extends ActionContinuousBase
 {
 	void ActionWaterCropsFromTank()
 	{
-		m_CommandUID = DayZPlayerConstants.CMD_ACTIONMOD_INTERACTONCE;
-		m_StanceMask = DayZPlayerConstants.STANCEMASK_ALL;
+		m_CallbackClass = ActionWaterCropsFromTankCB;
+		m_CommandUID = DayZPlayerConstants.CMD_ACTIONFB_INTERACT;
+		m_FullBody = true;
+		m_StanceMask = DayZPlayerConstants.STANCEMASK_ERECT;
 	}
 
 	override string GetText()
@@ -145,7 +155,7 @@ class ActionWaterCropsFromTank extends ActionInteractBase
 
 	override void CreateConditionComponents()
 	{
-		m_ConditionTarget = new CCTCursor;
+		m_ConditionTarget = new CCTNonRuined(UAMaxDistances.BASEBUILDING);
 		m_ConditionItem = new CCINone;
 	}
 
@@ -157,7 +167,7 @@ class ActionWaterCropsFromTank extends ActionInteractBase
 		return true;
 	}
 
-	override void OnExecuteServer(ActionData action_data)
+	override void OnFinishProgressServer(ActionData action_data)
 	{
 		JSA_WaterTank tank = JSA_WaterTank.Cast(action_data.m_Target.GetObject());
 		if (tank)
