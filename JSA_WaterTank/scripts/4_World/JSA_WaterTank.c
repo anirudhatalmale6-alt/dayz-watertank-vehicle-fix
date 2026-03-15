@@ -13,7 +13,6 @@ class JSA_WaterTankConfig
 	float rainCheckSeconds = 10.0;
 	float rainMinIntensity = 0.1;
 	float plantWaterRadius = 20.0;
-	float plantCheckSeconds = 60.0;
 	float plantWaterCostPerSlot = 2.0;
 	float plantSlotWaterMax = 200.0;
 	float drinkDrainPerTick = 2.0;
@@ -129,6 +128,43 @@ modded class ActionWashHandsWell
 	}
 };
 
+// ===== WATER CROPS ACTION =====
+
+class ActionWaterCropsFromTank extends ActionInteractBase
+{
+	void ActionWaterCropsFromTank()
+	{
+		m_CommandUID = DayZPlayerConstants.CMD_ACTIONMOD_INTERACTONCE;
+		m_StanceMask = DayZPlayerConstants.STANCEMASK_ALL;
+	}
+
+	override string GetText()
+	{
+		return "Water Crops";
+	}
+
+	override void CreateConditionComponents()
+	{
+		m_ConditionTarget = new CCTCursor;
+		m_ConditionItem = new CCINone;
+	}
+
+	override bool ActionCondition(PlayerBase player, ActionTarget target, ItemBase item)
+	{
+		JSA_WaterTank tank = JSA_WaterTank.Cast(target.GetObject());
+		if (!tank || !tank.HasWater())
+			return false;
+		return true;
+	}
+
+	override void OnExecuteServer(ActionData action_data)
+	{
+		JSA_WaterTank tank = JSA_WaterTank.Cast(action_data.m_Target.GetObject());
+		if (tank)
+			tank.JSA_WaterCropsNow();
+	}
+};
+
 // ===== WATER TANK CLASS =====
 
 class JSA_WaterTank extends Msp_Item
@@ -157,7 +193,6 @@ class JSA_WaterTank extends Msp_Item
 			}
 
 			GetGame().GetCallQueue(CALL_CATEGORY_SYSTEM).CallLater(JSA_RainCheck, cfg.rainCheckSeconds * 1000, true);
-			GetGame().GetCallQueue(CALL_CATEGORY_SYSTEM).CallLater(JSA_WaterPlantsCheck, cfg.plantCheckSeconds * 1000, true);
 		}
 	}
 
@@ -166,7 +201,6 @@ class JSA_WaterTank extends Msp_Item
 		if (GetGame())
 		{
 			GetGame().GetCallQueue(CALL_CATEGORY_SYSTEM).Remove(JSA_RainCheck);
-			GetGame().GetCallQueue(CALL_CATEGORY_SYSTEM).Remove(JSA_WaterPlantsCheck);
 		}
 		super.EEDelete(parent);
 	}
@@ -245,8 +279,8 @@ class JSA_WaterTank extends Msp_Item
 		}
 	}
 
-	// --- Auto-Water Plants ---
-	void JSA_WaterPlantsCheck()
+	// --- Water Crops (manual action) ---
+	void JSA_WaterCropsNow()
 	{
 		if (!GetGame() || !GetGame().IsServer())
 			return;
@@ -333,5 +367,6 @@ class JSA_WaterTank extends Msp_Item
 
 		AddAction(ActionWashHandsWell);
 		AddAction(ActionDrinkWellContinuous);
+		AddAction(ActionWaterCropsFromTank);
 	}
 };
