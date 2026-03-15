@@ -36,12 +36,19 @@ modded class CarScript
         if (m_OwnerSteamID != "" && m_OwnerSteamID != "0")
             newHash = m_OwnerSteamID.Hash();
 
+        // Debug: log on first sync and on changes
+        if (JSA_PrevOwnerHash != newHash)
+        {
+            Print("[JSA_Vehicle] " + GetType() + " owner sync: m_OwnerSteamID=" + m_OwnerSteamID + " claimed=" + m_isVehicleClaimed + " hash=" + newHash);
+        }
+
         // Detect new claim: hash went from 0 to non-0
         if (JSA_PrevOwnerHash == 0 && newHash != 0)
         {
             // Check if the claimant is in a group
             if (!JSA_IsClaimantInGroup(m_OwnerSteamID))
             {
+                Print("[JSA_Vehicle] Claim reversed - player " + m_OwnerSteamID + " not in a group");
                 // Player is not in a group - reverse the claim
                 m_OwnerSteamID = "";
                 m_isVehicleClaimed = false;
@@ -57,6 +64,7 @@ modded class CarScript
         {
             JSA_OwnerHash = newHash;
             SetSynchDirty();
+            Print("[JSA_Vehicle] Hash synced to clients: " + JSA_OwnerHash);
         }
     }
 

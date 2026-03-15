@@ -294,11 +294,23 @@ class JSA_WaterTank extends Msp_Item
 		array<CargoBase> proxyCargos = new array<CargoBase>();
 		GetGame().GetObjectsAtPosition(GetPosition(), cfg.plantWaterRadius, objects, proxyCargos);
 
+		Print("[JSA_WaterTank] Water Crops triggered. Found " + objects.Count() + " objects within " + cfg.plantWaterRadius + "m");
+
+		int gardensFound = 0;
+		int slotsWatered = 0;
+
 		foreach (Object obj : objects)
 		{
 			GardenBase garden = GardenBase.Cast(obj);
 			if (!garden)
+			{
+				if (obj.IsKindOf("GardenBase"))
+					Print("[JSA_WaterTank] Object " + obj.GetType() + " IsKindOf GardenBase but Cast failed");
 				continue;
+			}
+
+			gardensFound++;
+			Print("[JSA_WaterTank] Found garden: " + garden.GetType() + " with " + garden.GetGardenSlotsCount() + " slots");
 
 			if (m_JSA_WaterLevel <= 0)
 				break;
@@ -315,6 +327,7 @@ class JSA_WaterTank extends Msp_Item
 						float needed = cfg.plantSlotWaterMax - currentWater;
 						slot.GiveWater(needed);
 						DrainWater(cfg.plantWaterCostPerSlot);
+						slotsWatered++;
 
 						if (m_JSA_WaterLevel <= 0)
 							break;
@@ -322,6 +335,8 @@ class JSA_WaterTank extends Msp_Item
 				}
 			}
 		}
+
+		Print("[JSA_WaterTank] Water Crops done. Gardens: " + gardensFound + ", Slots watered: " + slotsWatered);
 	}
 
 	// --- Display ---
