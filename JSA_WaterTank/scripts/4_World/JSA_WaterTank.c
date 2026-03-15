@@ -134,6 +134,7 @@ modded class ActionWashHandsWell
 class JSA_WaterTank extends Msp_Item
 {
 	protected float m_JSA_WaterLevel;
+	protected bool m_JSA_LoadedFromStorage;
 
 	void JSA_WaterTank()
 	{
@@ -147,6 +148,14 @@ class JSA_WaterTank extends Msp_Item
 		if (GetGame().IsServer())
 		{
 			JSA_WaterTankConfig cfg = JSA_WaterTankConfig.Get();
+
+			// Start full when freshly placed (not loaded from storage)
+			if (!m_JSA_LoadedFromStorage)
+			{
+				m_JSA_WaterLevel = cfg.tankCapacity;
+				SetSynchDirty();
+			}
+
 			GetGame().GetCallQueue(CALL_CATEGORY_SYSTEM).CallLater(JSA_RainCheck, cfg.rainCheckSeconds * 1000, true);
 			GetGame().GetCallQueue(CALL_CATEGORY_SYSTEM).CallLater(JSA_WaterPlantsCheck, cfg.plantCheckSeconds * 1000, true);
 		}
@@ -177,6 +186,7 @@ class JSA_WaterTank extends Msp_Item
 		if (!ctx.Read(m_JSA_WaterLevel))
 			m_JSA_WaterLevel = 0;
 
+		m_JSA_LoadedFromStorage = true;
 		return true;
 	}
 
