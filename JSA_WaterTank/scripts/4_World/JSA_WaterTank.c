@@ -262,7 +262,7 @@ class JSA_WaterTank extends Msp_Item
 				Slot slot = garden.GetSlotByIndex(i);
 				if (slot)
 				{
-					float currentWater = slot.GetWaterQuantity();
+					float currentWater = slot.GetWater();
 					if (currentWater < cfg.plantSlotWaterMax)
 					{
 						float needed = cfg.plantSlotWaterMax - currentWater;
