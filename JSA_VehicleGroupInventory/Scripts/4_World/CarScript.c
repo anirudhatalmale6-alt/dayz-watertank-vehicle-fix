@@ -1,10 +1,7 @@
 modded class CarScript
 {
-    // Hash of owner's steam ID, synced to clients via network variable.
-    // We use a hash (int) because RegisterNetSyncVariableString is not
-    // available on CarScript, and m_OwnerSteamID from HM may not be
-    // synced to clients.
     protected int JSA_OwnerHash;
+    protected int JSA_PrevOwnerHash;
 
     void CarScript()
     {
@@ -36,11 +33,48 @@ modded class CarScript
         if (m_OwnerSteamID != "" && m_OwnerSteamID != "0")
             newHash = m_OwnerSteamID.Hash();
 
+        // Detect new claim: hash went from 0 to non-0
+        if (JSA_PrevOwnerHash == 0 && newHash != 0)
+        {
+            // Check if the claimant is in a group
+            if (!JSA_IsClaimantInGroup(m_OwnerSteamID))
+            {
+                // Player is not in a group - reverse the claim
+                m_OwnerSteamID = "";
+                m_isVehicleClaimed = false;
+                m_OwnerGUID = "";
+                m_isVehicleLocked = false;
+                newHash = 0;
+            }
+        }
+
+        JSA_PrevOwnerHash = newHash;
+
         if (newHash != JSA_OwnerHash)
         {
             JSA_OwnerHash = newHash;
             SetSynchDirty();
         }
+    }
+
+    bool JSA_IsClaimantInGroup(string steamID)
+    {
+        // Find the online player and check their group
+        array<Man> players = new array<Man>();
+        GetGame().GetPlayers(players);
+
+        foreach (Man man : players)
+        {
+            PlayerBase pb = PlayerBase.Cast(man);
+            if (pb && pb.GetIdentity() && pb.GetIdentity().GetPlainId() == steamID)
+            {
+                return pb.GetLBGroup() != null;
+            }
+        }
+
+        // Player not online, check via group manager
+        LBGroup group = LBGroupManager.Get().GetPlayersGroup(steamID);
+        return group != null;
     }
 
     bool JSA_CanAccessVehicle(PlayerBase player)

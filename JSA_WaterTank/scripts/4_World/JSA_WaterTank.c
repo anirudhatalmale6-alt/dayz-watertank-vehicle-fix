@@ -2,9 +2,53 @@ class JSA_WaterTank_Kit extends Msp_Kit
 {
 };
 
+// ===== JSON CONFIG =====
+// Auto-created at: DayZServer/profiles/JSA_WaterTank/config.json
+// Edit the JSON to tweak values, then restart server to apply.
+
+class JSA_WaterTankConfig
+{
+	float tankCapacity = 1000.0;
+	float rainFillRate = 5.0;
+	float rainCheckSeconds = 10.0;
+	float rainMinIntensity = 0.1;
+	float plantWaterRadius = 20.0;
+	float plantCheckSeconds = 60.0;
+	float plantWaterCostPerSlot = 2.0;
+	float plantSlotWaterMax = 200.0;
+	float drinkDrainPerTick = 2.0;
+	float washDrainPerTick = 3.0;
+	float fillBottleDrainMultiplier = 0.5;
+
+	static ref JSA_WaterTankConfig m_Instance;
+
+	static JSA_WaterTankConfig Get()
+	{
+		if (!m_Instance)
+		{
+			m_Instance = new JSA_WaterTankConfig();
+
+			if (GetGame().IsServer())
+			{
+				string path = "$profile:JSA_WaterTank/config.json";
+
+				if (FileExist(path))
+				{
+					JsonFileLoader<JSA_WaterTankConfig>.JsonLoadFile(path, m_Instance);
+				}
+				else
+				{
+					MakeDirectory("$profile:JSA_WaterTank");
+					JsonFileLoader<JSA_WaterTankConfig>.JsonSaveFile(path, m_Instance);
+				}
+			}
+		}
+		return m_Instance;
+	}
+};
+
 // ===== MODDED VANILLA ACTIONS =====
 
-// Extend vanilla fill bottle to work with our tank + check water level
 modded class ActionFillBottleBase
 {
 	override bool ActionCondition(PlayerBase player, ActionTarget target, ItemBase item)
@@ -31,7 +75,7 @@ modded class ActionFillBottleBase
 		{
 			float fillAmount = action_data.m_MainItem.GetQuantityMax();
 			Liquid.FillContainerEnviro(action_data.m_MainItem, LIQUID_WATER, fillAmount);
-			tank.DrainWater(fillAmount * 0.5);
+			tank.DrainWater(fillAmount * JSA_WaterTankConfig.Get().fillBottleDrainMultiplier);
 			return;
 		}
 
@@ -39,7 +83,6 @@ modded class ActionFillBottleBase
 	}
 };
 
-// Only show drink action when tank has water, drain tank while drinking
 modded class ActionDrinkWellContinuous
 {
 	override bool ActionCondition(PlayerBase player, ActionTarget target, ItemBase item)
@@ -59,11 +102,10 @@ modded class ActionDrinkWellContinuous
 		Object target = action_data.m_Target.GetObject();
 		JSA_WaterTank tank = JSA_WaterTank.Cast(target);
 		if (tank)
-			tank.DrainWater(2.0);
+			tank.DrainWater(JSA_WaterTankConfig.Get().drinkDrainPerTick);
 	}
 };
 
-// Only show wash action when tank has water, drain tank while washing
 modded class ActionWashHandsWell
 {
 	override bool ActionCondition(PlayerBase player, ActionTarget target, ItemBase item)
@@ -83,7 +125,7 @@ modded class ActionWashHandsWell
 		Object target = action_data.m_Target.GetObject();
 		JSA_WaterTank tank = JSA_WaterTank.Cast(target);
 		if (tank)
-			tank.DrainWater(3.0);
+			tank.DrainWater(JSA_WaterTankConfig.Get().washDrainPerTick);
 	}
 };
 
@@ -91,21 +133,11 @@ modded class ActionWashHandsWell
 
 class JSA_WaterTank extends Msp_Item
 {
-	// --- Configuration (adjust these values as needed) ---
-	static const float JSA_TANK_CAPACITY       = 1000.0;  // Max water (liters)
-	static const float JSA_RAIN_FILL_RATE      = 5.0;     // Liters gained per rain tick (scaled by intensity)
-	static const float JSA_PLANT_WATER_COST    = 2.0;     // Water used per garden slot watered
-	static const float JSA_PLANT_WATER_RADIUS  = 20.0;    // Radius (meters) for auto-watering
-	static const float JSA_RAIN_CHECK_SEC      = 10.0;    // Seconds between rain checks
-	static const float JSA_PLANT_CHECK_SEC     = 60.0;    // Seconds between plant watering checks
-	static const float JSA_SLOT_WATER_MAX      = 200.0;   // Max water per garden slot (vanilla default)
-
-	// --- State ---
 	protected float m_JSA_WaterLevel;
 
 	void JSA_WaterTank()
 	{
-		RegisterNetSyncVariableFloat("m_JSA_WaterLevel", 0, JSA_TANK_CAPACITY, 1);
+		RegisterNetSyncVariableFloat("m_JSA_WaterLevel", 0, 10000, 1);
 	}
 
 	override void EEInit()
@@ -114,8 +146,9 @@ class JSA_WaterTank extends Msp_Item
 
 		if (GetGame().IsServer())
 		{
-			GetGame().GetCallQueue(CALL_CATEGORY_SYSTEM).CallLater(JSA_RainCheck, JSA_RAIN_CHECK_SEC * 1000, true);
-			GetGame().GetCallQueue(CALL_CATEGORY_SYSTEM).CallLater(JSA_WaterPlantsCheck, JSA_PLANT_CHECK_SEC * 1000, true);
+			JSA_WaterTankConfig cfg = JSA_WaterTankConfig.Get();
+			GetGame().GetCallQueue(CALL_CATEGORY_SYSTEM).CallLater(JSA_RainCheck, cfg.rainCheckSeconds * 1000, true);
+			GetGame().GetCallQueue(CALL_CATEGORY_SYSTEM).CallLater(JSA_WaterPlantsCheck, cfg.plantCheckSeconds * 1000, true);
 		}
 	}
 
@@ -126,7 +159,7 @@ class JSA_WaterTank extends Msp_Item
 		super.EEDelete(parent);
 	}
 
-	// --- Persistence across server restarts ---
+	// --- Persistence ---
 	override void OnStoreSave(ParamsWriteContext ctx)
 	{
 		super.OnStoreSave(ctx);
@@ -150,11 +183,6 @@ class JSA_WaterTank extends Msp_Item
 		return m_JSA_WaterLevel;
 	}
 
-	float GetWaterCapacity()
-	{
-		return JSA_TANK_CAPACITY;
-	}
-
 	bool HasWater()
 	{
 		return m_JSA_WaterLevel > 0;
@@ -165,7 +193,8 @@ class JSA_WaterTank extends Msp_Item
 		if (!GetGame().IsServer())
 			return;
 
-		m_JSA_WaterLevel = Math.Clamp(m_JSA_WaterLevel - amount, 0, JSA_TANK_CAPACITY);
+		float cap = JSA_WaterTankConfig.Get().tankCapacity;
+		m_JSA_WaterLevel = Math.Clamp(m_JSA_WaterLevel - amount, 0, cap);
 		SetSynchDirty();
 	}
 
@@ -174,8 +203,9 @@ class JSA_WaterTank extends Msp_Item
 		if (!GetGame().IsServer())
 			return;
 
+		float cap = JSA_WaterTankConfig.Get().tankCapacity;
 		float oldLevel = m_JSA_WaterLevel;
-		m_JSA_WaterLevel = Math.Clamp(m_JSA_WaterLevel + amount, 0, JSA_TANK_CAPACITY);
+		m_JSA_WaterLevel = Math.Clamp(m_JSA_WaterLevel + amount, 0, cap);
 		if (m_JSA_WaterLevel != oldLevel)
 			SetSynchDirty();
 	}
@@ -186,7 +216,9 @@ class JSA_WaterTank extends Msp_Item
 		if (!GetGame().IsServer())
 			return;
 
-		if (m_JSA_WaterLevel >= JSA_TANK_CAPACITY)
+		JSA_WaterTankConfig cfg = JSA_WaterTankConfig.Get();
+
+		if (m_JSA_WaterLevel >= cfg.tankCapacity)
 			return;
 
 		Weather weather = GetGame().GetWeather();
@@ -194,13 +226,13 @@ class JSA_WaterTank extends Msp_Item
 			return;
 
 		float rainIntensity = weather.GetRain().GetActual();
-		if (rainIntensity > 0.1)
+		if (rainIntensity > cfg.rainMinIntensity)
 		{
-			AddWater(JSA_RAIN_FILL_RATE * rainIntensity);
+			AddWater(cfg.rainFillRate * rainIntensity);
 		}
 	}
 
-	// --- Auto-Water Nearby Gardens ---
+	// --- Auto-Water Plants ---
 	void JSA_WaterPlantsCheck()
 	{
 		if (!GetGame().IsServer())
@@ -209,9 +241,11 @@ class JSA_WaterTank extends Msp_Item
 		if (m_JSA_WaterLevel <= 0)
 			return;
 
+		JSA_WaterTankConfig cfg = JSA_WaterTankConfig.Get();
+
 		array<Object> objects = new array<Object>();
 		array<CargoBase> proxyCargos = new array<CargoBase>();
-		GetGame().GetObjectsAtPosition(GetPosition(), JSA_PLANT_WATER_RADIUS, objects, proxyCargos);
+		GetGame().GetObjectsAtPosition(GetPosition(), cfg.plantWaterRadius, objects, proxyCargos);
 
 		foreach (Object obj : objects)
 		{
@@ -229,11 +263,11 @@ class JSA_WaterTank extends Msp_Item
 				if (slot)
 				{
 					float currentWater = slot.GetWaterQuantity();
-					if (currentWater < JSA_SLOT_WATER_MAX)
+					if (currentWater < cfg.plantSlotWaterMax)
 					{
-						float needed = JSA_SLOT_WATER_MAX - currentWater;
+						float needed = cfg.plantSlotWaterMax - currentWater;
 						slot.GiveWater(needed);
-						DrainWater(JSA_PLANT_WATER_COST);
+						DrainWater(cfg.plantWaterCostPerSlot);
 
 						if (m_JSA_WaterLevel <= 0)
 							break;
@@ -243,7 +277,7 @@ class JSA_WaterTank extends Msp_Item
 		}
 	}
 
-	// --- Existing overrides ---
+	// --- Standard overrides ---
 	override bool CanPutInCargo(EntityAI parent)
 	{
 		return false;
