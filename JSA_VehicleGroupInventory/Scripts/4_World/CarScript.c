@@ -12,8 +12,27 @@ modded class CarScript
     override void OnVariablesSynchronized()
     {
         super.OnVariablesSynchronized();
-        if (JSA_OwnerHash != 0)
-            Print("[JSA_Vehicle] CLIENT received hash: " + JSA_OwnerHash + " for " + GetType());
+
+        // Client-side: physically lock/unlock inventory based on access
+        if (!GetGame().IsServer())
+        {
+            PlayerBase player = PlayerBase.Cast(GetGame().GetPlayer());
+            if (JSA_OwnerHash != 0 && player && !JSA_CanAccessVehicle(player))
+            {
+                // Lock cargo to physically hide it (bypasses CanDisplayCargo overrides from other mods)
+                GetInventory().LockInventory(HIDE_INV_FROM_SCRIPT);
+                Print("[JSA_Vehicle] CLIENT locked inventory for " + GetType() + " (ownerHash=" + JSA_OwnerHash + ")");
+            }
+            else
+            {
+                // Unlock if unclaimed or player has access
+                if (GetInventory().IsInventoryLockedForLockType(HIDE_INV_FROM_SCRIPT))
+                {
+                    GetInventory().UnlockInventory(HIDE_INV_FROM_SCRIPT);
+                    Print("[JSA_Vehicle] CLIENT unlocked inventory for " + GetType());
+                }
+            }
+        }
     }
 
     override void EEInit()

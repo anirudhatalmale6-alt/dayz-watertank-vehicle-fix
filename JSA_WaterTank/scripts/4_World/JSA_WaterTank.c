@@ -17,7 +17,7 @@ class JSA_WaterTankConfig
 	float plantSlotWaterMax = 200.0;
 	float drinkDrainPerTick = 2.0;
 	float washDrainPerTick = 3.0;
-	float fillBottleDrainMultiplier = 0.5;
+	float fillBottleDrainAmount = 10.0;
 
 	static ref JSA_WaterTankConfig m_Instance;
 
@@ -74,7 +74,7 @@ modded class ActionFillBottleBase
 		{
 			float fillAmount = action_data.m_MainItem.GetQuantityMax();
 			Liquid.FillContainerEnviro(action_data.m_MainItem, LIQUID_WATER, fillAmount);
-			tank.DrainWater(fillAmount * JSA_WaterTankConfig.Get().fillBottleDrainMultiplier);
+			tank.DrainWater(JSA_WaterTankConfig.Get().fillBottleDrainAmount);
 			return;
 		}
 
@@ -129,23 +129,14 @@ modded class ActionWashHandsWell
 };
 
 // ===== WATER CROPS ACTION =====
+// Uses same pattern as MuchFramework's ActionMFVSStoreContents (proven to work on Msp_Item)
 
-class ActionWaterCropsFromTankCB : ActionContinuousBaseCB
-{
-	override void CreateActionComponent()
-	{
-		m_ActionData.m_ActionComponent = new CAContinuousTime(2);
-	}
-};
-
-class ActionWaterCropsFromTank extends ActionContinuousBase
+class ActionWaterCropsFromTank extends ActionInteractBase
 {
 	void ActionWaterCropsFromTank()
 	{
-		m_CallbackClass = ActionWaterCropsFromTankCB;
-		m_CommandUID = DayZPlayerConstants.CMD_ACTIONFB_INTERACT;
-		m_FullBody = true;
-		m_StanceMask = DayZPlayerConstants.STANCEMASK_ERECT;
+		m_CommandUID = DayZPlayerConstants.CMD_ACTIONMOD_OPENDOORFW;
+		m_StanceMask = DayZPlayerConstants.STANCEMASK_CROUCH | DayZPlayerConstants.STANCEMASK_ERECT;
 	}
 
 	override string GetText()
@@ -153,9 +144,14 @@ class ActionWaterCropsFromTank extends ActionContinuousBase
 		return "Water Crops";
 	}
 
+	override typename GetInputType()
+	{
+		return ContinuousInteractActionInput;
+	}
+
 	override void CreateConditionComponents()
 	{
-		m_ConditionTarget = new CCTNonRuined(UAMaxDistances.BASEBUILDING);
+		m_ConditionTarget = new CCTNonRuined(UAMaxDistances.DEFAULT);
 		m_ConditionItem = new CCINone;
 	}
 
@@ -167,7 +163,7 @@ class ActionWaterCropsFromTank extends ActionContinuousBase
 		return true;
 	}
 
-	override void OnFinishProgressServer(ActionData action_data)
+	override void OnStartServer(ActionData action_data)
 	{
 		JSA_WaterTank tank = JSA_WaterTank.Cast(action_data.m_Target.GetObject());
 		if (tank)

@@ -5,7 +5,7 @@ class CfgPatches
         units[] = {"JSA_Base_2F_Kit", "JSA_Base_2FLift_Kit"};
         weapons[] = {};
         requiredVersion = 0.1;
-        requiredAddons[] = {"ch_bases_one_base"};
+        requiredAddons[] = {"ch_bases_one_base", "MuchFramework"};
     };
 };
 
