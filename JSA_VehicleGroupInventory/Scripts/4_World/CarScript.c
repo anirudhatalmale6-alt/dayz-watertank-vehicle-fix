@@ -1,49 +1,80 @@
 modded class CarScript
 {
-    // HM Vehicle Claim already adds 'string OwnerSteamID' to CarScript
-    // and syncs it to all clients. We just read it directly.
+    // Hash of owner's steam ID, synced to clients via network variable.
+    // We use a hash (int) because RegisterNetSyncVariableString is not
+    // available on CarScript, and m_OwnerSteamID from HM may not be
+    // synced to clients.
+    protected int JSA_OwnerHash;
 
-    bool JSA_IsVehicleClaimed()
+    void CarScript()
     {
-        return OwnerSteamID != "" && OwnerSteamID != "0";
+        RegisterNetSyncVariableInt("JSA_OwnerHash");
+    }
+
+    override void EEInit()
+    {
+        super.EEInit();
+
+        if (GetGame().IsServer())
+        {
+            GetGame().GetCallQueue(CALL_CATEGORY_SYSTEM).CallLater(JSA_SyncOwnerHash, 2000, true);
+        }
+    }
+
+    override void EEDelete(EntityAI parent)
+    {
+        GetGame().GetCallQueue(CALL_CATEGORY_SYSTEM).Remove(JSA_SyncOwnerHash);
+        super.EEDelete(parent);
+    }
+
+    void JSA_SyncOwnerHash()
+    {
+        if (!GetGame().IsServer())
+            return;
+
+        int newHash = 0;
+        if (m_OwnerSteamID != "" && m_OwnerSteamID != "0")
+            newHash = m_OwnerSteamID.Hash();
+
+        if (newHash != JSA_OwnerHash)
+        {
+            JSA_OwnerHash = newHash;
+            SetSynchDirty();
+        }
     }
 
     bool JSA_CanAccessVehicle(PlayerBase player)
     {
         // Unclaimed vehicles are accessible to everyone
-        if (!JSA_IsVehicleClaimed())
+        if (JSA_OwnerHash == 0)
             return true;
 
         if (!player)
             return false;
 
-        PlayerIdentity identity = player.GetIdentity();
-        if (!identity)
-            return false;
-
-        string playerUID = identity.GetId();
-
-        // Owner always has access
-        if (playerUID == OwnerSteamID)
+        // Admin bypass
+        if (LBAdmins.Get().HasPermissionActive("groups.build.enemy", player))
             return true;
 
-        // Admin bypass - LBAdmins.Get().HasPermission()
-        if (LBAdmins.Get().HasPermission("groups.build.enemy", identity))
+        // Owner check
+        string playerUID = player.GetMySteamId();
+        if (playerUID != "" && playerUID.Hash() == JSA_OwnerHash)
             return true;
 
-        // Check if the player and the vehicle owner are in the same LBMaster group
-        LBGroup ownerGroup = LBGroupManager.Get().GetPlayersGroup(OwnerSteamID);
-        if (ownerGroup)
+        // Group check - is the vehicle owner in my group?
+        LBGroup myGroup = player.GetLBGroup();
+        if (myGroup)
         {
-            LBGroup playerGroup = player.GetLBGroup();
-            if (playerGroup && playerGroup == ownerGroup)
-                return true;
+            foreach (LBGroupMember member : myGroup.members)
+            {
+                if (member && member.steamid.Hash() == JSA_OwnerHash)
+                    return true;
+            }
         }
 
         return false;
     }
 
-    // Client-side: Hide cargo from non-group players
     override bool CanDisplayCargo()
     {
         PlayerBase player = PlayerBase.Cast(GetGame().GetPlayer());
@@ -53,7 +84,6 @@ modded class CarScript
         return super.CanDisplayCargo();
     }
 
-    // Client-side: Hide attachment slots from non-group players
     override bool CanDisplayAttachmentSlot(int slot_id)
     {
         PlayerBase player = PlayerBase.Cast(GetGame().GetPlayer());
@@ -63,7 +93,6 @@ modded class CarScript
         return super.CanDisplayAttachmentSlot(slot_id);
     }
 
-    // Prevent non-group players from removing attachments
     override bool CanReleaseAttachment(EntityAI attachment)
     {
         PlayerBase player = PlayerBase.Cast(GetGame().GetPlayer());
@@ -73,7 +102,6 @@ modded class CarScript
         return super.CanReleaseAttachment(attachment);
     }
 
-    // Prevent non-group players from putting items in
     override bool CanReceiveItemIntoCargo(EntityAI item)
     {
         PlayerBase player = PlayerBase.Cast(GetGame().GetPlayer());
@@ -83,7 +111,6 @@ modded class CarScript
         return super.CanReceiveItemIntoCargo(item);
     }
 
-    // Prevent non-group players from attaching items
     override bool CanReceiveAttachment(EntityAI attachment, int slotId)
     {
         PlayerBase player = PlayerBase.Cast(GetGame().GetPlayer());

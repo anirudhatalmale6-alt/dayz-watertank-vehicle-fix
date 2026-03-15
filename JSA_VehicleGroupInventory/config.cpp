@@ -20,8 +20,8 @@ class CfgMods
         hidePicture = 1;
         name = "JSA Vehicle Group Inventory";
         credits = "";
-        author = "JSA";
-        authorID = "0";
+        author = "BipolarBear";
+        authorID = "";
         version = "1.0";
         extra = 0;
         type = "mod";
