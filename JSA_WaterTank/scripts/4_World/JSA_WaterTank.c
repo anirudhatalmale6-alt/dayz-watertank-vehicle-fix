@@ -154,8 +154,11 @@ class JSA_WaterTank extends Msp_Item
 
 	override void EEDelete(EntityAI parent)
 	{
-		GetGame().GetCallQueue(CALL_CATEGORY_SYSTEM).Remove(JSA_RainCheck);
-		GetGame().GetCallQueue(CALL_CATEGORY_SYSTEM).Remove(JSA_WaterPlantsCheck);
+		if (GetGame())
+		{
+			GetGame().GetCallQueue(CALL_CATEGORY_SYSTEM).Remove(JSA_RainCheck);
+			GetGame().GetCallQueue(CALL_CATEGORY_SYSTEM).Remove(JSA_WaterPlantsCheck);
+		}
 		super.EEDelete(parent);
 	}
 
@@ -213,7 +216,7 @@ class JSA_WaterTank extends Msp_Item
 	// --- Rain Fill ---
 	void JSA_RainCheck()
 	{
-		if (!GetGame().IsServer())
+		if (!GetGame() || !GetGame().IsServer())
 			return;
 
 		JSA_WaterTankConfig cfg = JSA_WaterTankConfig.Get();
@@ -235,7 +238,7 @@ class JSA_WaterTank extends Msp_Item
 	// --- Auto-Water Plants ---
 	void JSA_WaterPlantsCheck()
 	{
-		if (!GetGame().IsServer())
+		if (!GetGame() || !GetGame().IsServer())
 			return;
 
 		if (m_JSA_WaterLevel <= 0)

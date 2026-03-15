@@ -20,13 +20,16 @@ modded class CarScript
 
     override void EEDelete(EntityAI parent)
     {
-        GetGame().GetCallQueue(CALL_CATEGORY_SYSTEM).Remove(JSA_SyncOwnerHash);
+        if (GetGame())
+        {
+            GetGame().GetCallQueue(CALL_CATEGORY_SYSTEM).Remove(JSA_SyncOwnerHash);
+        }
         super.EEDelete(parent);
     }
 
     void JSA_SyncOwnerHash()
     {
-        if (!GetGame().IsServer())
+        if (!GetGame() || !GetGame().IsServer())
             return;
 
         int newHash = 0;
