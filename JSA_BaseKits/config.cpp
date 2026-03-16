@@ -5,7 +5,7 @@ class CfgPatches
         units[] = {"JSA_Base_2F_Kit", "JSA_Base_2FLift_Kit"};
         weapons[] = {};
         requiredVersion = 0.1;
-        requiredAddons[] = {"ch_bases_one_base"};
+        requiredAddons[] = {"ch_bases_one_base", "MSP_Scripts"};
     };
 };
 
@@ -49,29 +49,20 @@ class CfgMods
 
 class CfgVehicles
 {
-    class ItemBase;
-    class JSA_Base_2F_Kit : ItemBase
+    class Msp_Kit;
+
+    class JSA_Base_2F_Kit : Msp_Kit
     {
         scope = 2;
         displayName = "Base Kit (2 Floor)";
         descriptionShort = "Deploy a 2-floor base building.";
-        model = "\MuchFramework\data\kitbox\kitbox.p3d";
-        weight = 10000;
-        itemSize[] = {4, 4};
-        canBeDigged = 0;
-        class AnimEvents {};
     };
 
-    class JSA_Base_2FLift_Kit : ItemBase
+    class JSA_Base_2FLift_Kit : Msp_Kit
     {
         scope = 2;
         displayName = "Base Kit (2 Floor + Lift)";
         descriptionShort = "Deploy a 2-floor base with lift.";
-        model = "\MuchFramework\data\kitbox\kitbox.p3d";
-        weight = 10000;
-        itemSize[] = {4, 4};
-        canBeDigged = 0;
-        class AnimEvents {};
     };
 
     class ch_b_2f_roof_w_n_p;
