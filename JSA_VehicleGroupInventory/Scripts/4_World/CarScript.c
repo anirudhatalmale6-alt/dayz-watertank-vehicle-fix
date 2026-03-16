@@ -118,12 +118,26 @@ modded class CarScript
             PlayerBase pb = PlayerBase.Cast(man);
             if (pb && pb.GetIdentity() && pb.GetIdentity().GetPlainId() == steamID)
             {
-                // Action message RPC (center screen) - same method MuchFramework uses
-                // Important: first param must be the PLAYER, not the vehicle
-                Param1<string> msgParam = new Param1<string>("You need to be in a group for vehicle inventory protection!");
-                GetGame().RPCSingleParam(pb, ERPCs.RPC_USER_ACTION_MESSAGE, msgParam, true, pb.GetIdentity());
+                // Send via LBMaster chat system (same format as LBChatHandler.SendSimpleChatMessage)
+                int channel = CCSystem;
+                int temp = 0;
+                string str = "";
+                bool tempB = false;
+                ScriptRPC rpc = new ScriptRPC();
+                rpc.Write(channel);
+                rpc.Write(str);
+                rpc.Write("+You need to be in a group for vehicle inventory protection!");
+                rpc.Write(str);
+                rpc.Write(str);
+                rpc.Write(temp);
+                rpc.Write(str);
+                rpc.Write(temp);
+                rpc.Write(tempB);
+                rpc.Write(temp);
+                rpc.Write(str);
+                rpc.Send(NULL, LBGroupRPCs.LB_GLOBAL_CHAT, true, pb.GetIdentity());
 
-                Print("[JSA_Vehicle] Sent no-group notification to " + steamID);
+                Print("[JSA_Vehicle] Sent no-group chat notification to " + steamID);
                 break;
             }
         }
