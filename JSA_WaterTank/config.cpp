@@ -41,9 +41,8 @@ class CfgMods
 
 class CfgVehicles
 {
-	class Inventory_Base;
-	class Msp_Item : Inventory_Base {};
-	class Msp_Kit  : Inventory_Base {};
+	class Msp_Item;
+	class Msp_Kit;
 
 	class JSA_WaterTank_Kit : Msp_Kit
 	{
