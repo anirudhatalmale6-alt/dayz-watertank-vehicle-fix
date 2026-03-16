@@ -118,14 +118,14 @@ modded class CarScript
             PlayerBase pb = PlayerBase.Cast(man);
             if (pb && pb.GetIdentity() && pb.GetIdentity().GetPlainId() == steamID)
             {
-                // Try multiple notification methods for reliability
-                // Method 1: Action message RPC (shows center screen)
-                Param1<string> msgParam = new Param1<string>("You must be in a group for vehicle inventory protection!");
-                GetGame().RPCSingleParam(this, ERPCs.RPC_USER_ACTION_MESSAGE, msgParam, true, pb.GetIdentity());
-
-                // Method 2: Chat message (shows in chat area)
-                Param1<string> chatParam = new Param1<string>("[Vehicle Claim] You need to be in a group for your vehicle inventory to be protected from other players.");
-                GetGame().RPCSingleParam(pb, ERPCs.RPC_CHAT_MSG, chatParam, true, pb.GetIdentity());
+                // LBMaster-style notification popup (icon + message)
+                NotificationSystem.SendNotificationToPlayerIdentityExtended(
+                    pb.GetIdentity(),
+                    8.0,
+                    "#lb_message_group_system",
+                    "You must be in a group for your vehicle inventory to be protected from other players!",
+                    "set:ccgui_enforce image:MapDestroyed"
+                );
 
                 Print("[JSA_Vehicle] Sent no-group notification to " + steamID);
                 break;
