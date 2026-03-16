@@ -118,14 +118,10 @@ modded class CarScript
             PlayerBase pb = PlayerBase.Cast(man);
             if (pb && pb.GetIdentity() && pb.GetIdentity().GetPlainId() == steamID)
             {
-                // LBMaster-style notification popup (icon + message)
-                NotificationSystem.SendNotificationToPlayerIdentityExtended(
-                    pb.GetIdentity(),
-                    8.0,
-                    "#lb_message_group_system",
-                    "You must be in a group for your vehicle inventory to be protected from other players!",
-                    "set:ccgui_enforce image:MapDestroyed"
-                );
+                // Action message RPC (center screen) - same method MuchFramework uses
+                // Important: first param must be the PLAYER, not the vehicle
+                Param1<string> msgParam = new Param1<string>("You need to be in a group for vehicle inventory protection!");
+                GetGame().RPCSingleParam(pb, ERPCs.RPC_USER_ACTION_MESSAGE, msgParam, true, pb.GetIdentity());
 
                 Print("[JSA_Vehicle] Sent no-group notification to " + steamID);
                 break;
