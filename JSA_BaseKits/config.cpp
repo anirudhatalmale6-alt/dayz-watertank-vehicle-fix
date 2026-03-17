@@ -49,38 +49,28 @@ class CfgMods
 
 class CfgVehicles
 {
-    class Container_Base;
+    class Msp_Kit;
 
-    class JSA_Base_2F_Kit : Container_Base
+    class JSA_Base_2F_Kit : Msp_Kit
     {
         scope = 2;
         displayName = "Base Kit (2 Floor)";
         descriptionShort = "Deploy a 2-floor base building.";
         model = "\MuchFramework\data\kitbox\kitbox.p3d";
-        rotationFlags = 2;
-        weight = 5000;
+        deployItem = "JSA_Base_2F";
         itemSize[] = {4, 4};
-        heavyItem = 1;
-        handheld = "true";
-        alignHologramToTerain = 0;
-        carveNavmesh = 1;
-        yawPitchRollLimit[] = {10, 10, 10};
+        weight = 5000;
     };
 
-    class JSA_Base_2FLift_Kit : Container_Base
+    class JSA_Base_2FLift_Kit : Msp_Kit
     {
         scope = 2;
         displayName = "Base Kit (2 Floor + Lift)";
         descriptionShort = "Deploy a 2-floor base with lift.";
         model = "\MuchFramework\data\kitbox\kitbox.p3d";
-        rotationFlags = 2;
-        weight = 5000;
+        deployItem = "JSA_Base_2FLift";
         itemSize[] = {4, 4};
-        heavyItem = 1;
-        handheld = "true";
-        alignHologramToTerain = 0;
-        carveNavmesh = 1;
-        yawPitchRollLimit[] = {10, 10, 10};
+        weight = 5000;
     };
 
     class ch_b_2f_roof_w_n_p;
