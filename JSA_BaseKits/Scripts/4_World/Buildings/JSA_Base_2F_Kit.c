@@ -5,11 +5,17 @@ class JSA_Base_2F_Kit extends Msp_Kit
 		// Do NOT call super — Msp_Kit's OnPlacementComplete creates a duplicate building
 		if (GetGame().IsServer())
 		{
-			// position already includes terrain height + itemPlacingPos offset from hologram
-			JSA_Base_2F building = JSA_Base_2F.Cast(GetGame().CreateObjectEx("JSA_Base_2F", position, ECE_PLACE_ON_SURFACE));
-			building.SetPosition(position);
-			building.SetOrientation(orientation);
-			// Do NOT call Update() — it re-snaps to terrain surface, undoing the height offset
+			Print("[JSA_BaseKits] Placing JSA_Base_2F at position: " + position.ToString());
+
+			// Do NOT use ECE_PLACE_ON_SURFACE — it snaps the building center to ground level,
+			// ignoring the Y offset from itemPlacingPos and burying the bottom half
+			Object building = GetGame().CreateObjectEx("JSA_Base_2F", position, ECE_CREATEPHYSICS);
+			if (building)
+			{
+				building.SetPosition(position);
+				building.SetOrientation(orientation);
+				Print("[JSA_BaseKits] Building placed at: " + building.GetPosition().ToString());
+			}
 
 			this.Delete();
 		}

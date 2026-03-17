@@ -56,7 +56,7 @@ class CfgVehicles
         scope = 2;
         displayName = "Base Kit (2 Floor)";
         descriptionShort = "Deploy a 2-floor base building.";
-        itemPlacingPos[] = {0, 3.0, 0};
+        itemPlacingPos[] = {0, 5.0, 0};
     };
 
     class JSA_Base_2FLift_Kit : Msp_Kit
@@ -64,7 +64,7 @@ class CfgVehicles
         scope = 2;
         displayName = "Base Kit (2 Floor + Lift)";
         descriptionShort = "Deploy a 2-floor base with lift.";
-        itemPlacingPos[] = {0, 3.0, 0};
+        itemPlacingPos[] = {0, 5.0, 0};
     };
 
     class ch_b_2f_roof_w_n_p;
