@@ -1,24 +1,77 @@
-class JSA_Base_2FLift_Kit extends Msp_Kit
+class JSA_Base_2FLift_Kit extends ItemBase
 {
+	string GetBuildingClass()
+	{
+		return "JSA_Base_2FLift";
+	}
+
 	override void OnPlacementComplete(Man player, vector position = "0 0 0", vector orientation = "0 0 0")
 	{
-		// Do NOT call super — Msp_Kit's OnPlacementComplete creates a duplicate building
+		super.OnPlacementComplete(player, position, orientation);
 		if (GetGame().IsServer())
 		{
 			Print("[JSA_BaseKits] Placing JSA_Base_2FLift at position: " + position.ToString());
 
-			// Do NOT use ECE_PLACE_ON_SURFACE — it snaps the building center to ground level,
-			// ignoring the Y offset from itemPlacingPos and burying the bottom half
-			Object building = GetGame().CreateObjectEx("JSA_Base_2FLift", position, ECE_CREATEPHYSICS);
+			// ECE_PLACE_ON_SURFACE snaps model origin to terrain — handles slopes/hills on Deer Isle
+			Object building = GetGame().CreateObjectEx("JSA_Base_2FLift", position, ECE_PLACE_ON_SURFACE);
 			if (building)
 			{
 				building.SetPosition(position);
 				building.SetOrientation(orientation);
-				Print("[JSA_BaseKits] Building placed at: " + building.GetPosition().ToString());
+
+				// ch_bases models have origin at center, not bottom
+				// Read bounding box and raise so bottom sits at terrain surface
+				vector mins, maxs;
+				building.ClippingInfo(mins, maxs);
+				float raiseBy = 0;
+				if (mins[1] < 0)
+				{
+					raiseBy = -mins[1];
+				}
+				else
+				{
+					raiseBy = 4.0;
+				}
+
+				Print("[JSA_BaseKits] BBox mins=" + mins.ToString() + " maxs=" + maxs.ToString() + " raiseBy=" + raiseBy.ToString());
+
+				vector adjustedPos = building.GetPosition();
+				adjustedPos[1] = adjustedPos[1] + raiseBy;
+				building.SetPosition(adjustedPos);
+
+				building.Update();
+				Print("[JSA_BaseKits] Final position: " + building.GetPosition().ToString());
 			}
 
 			this.Delete();
 		}
-		SetIsPlaceSound(true);
+		SetIsDeploySound(true);
+	}
+
+	override bool IsBasebuildingKit()
+	{
+		return true;
+	}
+
+	override bool IsDeployable()
+	{
+		return true;
+	}
+
+	override string GetDeploySoundset()
+	{
+		return "placeHescoBox_SoundSet";
+	}
+
+	override string GetLoopDeploySoundset()
+	{
+		return "hescobox_deploy_SoundSet";
+	}
+
+	override void SetActions()
+	{
+		super.SetActions();
+		AddAction(ActionTogglePlaceObject);
+		AddAction(ActionPlaceObject);
 	}
 };

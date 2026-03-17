@@ -5,7 +5,7 @@ class CfgPatches
         units[] = {"JSA_Base_2F_Kit", "JSA_Base_2FLift_Kit"};
         weapons[] = {};
         requiredVersion = 0.1;
-        requiredAddons[] = {"ch_bases_one_base", "MSP_Scripts"};
+        requiredAddons[] = {"ch_bases_one_base", "DZ_Data", "MSP_Scripts"};
     };
 };
 
@@ -49,22 +49,38 @@ class CfgMods
 
 class CfgVehicles
 {
-    class Msp_Kit;
+    class Container_Base;
 
-    class JSA_Base_2F_Kit : Msp_Kit
+    class JSA_Base_2F_Kit : Container_Base
     {
         scope = 2;
         displayName = "Base Kit (2 Floor)";
         descriptionShort = "Deploy a 2-floor base building.";
-        itemPlacingPos[] = {0, 5.0, 0};
+        model = "\MuchFramework\data\kitbox\kitbox.p3d";
+        rotationFlags = 2;
+        weight = 5000;
+        itemSize[] = {4, 4};
+        heavyItem = 1;
+        handheld = "true";
+        alignHologramToTerain = 0;
+        carveNavmesh = 1;
+        yawPitchRollLimit[] = {10, 10, 10};
     };
 
-    class JSA_Base_2FLift_Kit : Msp_Kit
+    class JSA_Base_2FLift_Kit : Container_Base
     {
         scope = 2;
         displayName = "Base Kit (2 Floor + Lift)";
         descriptionShort = "Deploy a 2-floor base with lift.";
-        itemPlacingPos[] = {0, 5.0, 0};
+        model = "\MuchFramework\data\kitbox\kitbox.p3d";
+        rotationFlags = 2;
+        weight = 5000;
+        itemSize[] = {4, 4};
+        heavyItem = 1;
+        handheld = "true";
+        alignHologramToTerain = 0;
+        carveNavmesh = 1;
+        yawPitchRollLimit[] = {10, 10, 10};
     };
 
     class ch_b_2f_roof_w_n_p;
