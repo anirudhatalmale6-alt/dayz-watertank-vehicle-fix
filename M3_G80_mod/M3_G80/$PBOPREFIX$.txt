@@ -1,0 +1,6 @@
+//<'M3_G80.pbo' properties via Mikero's dos tools, dll version 9.98>
+product=dayz ugc;
+version=1;
+prefix=M3_G80;
+//PboType=Arma Addon;
+//</properties>
