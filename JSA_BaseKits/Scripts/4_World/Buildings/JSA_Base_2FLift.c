@@ -13,23 +13,35 @@ class JSA_Base_2FLift : House
 
         if (GetGame().IsServer())
         {
-            vector pos = GetPosition();
-            float surfaceY = GetGame().SurfaceY(pos[0], pos[2]);
+            // Delay height correction so model geometry is fully loaded
+            GetGame().GetCallQueue(CALL_CATEGORY_SYSTEM).CallLater(CorrectHeight, 500, false);
+        }
+    }
 
-            vector boundingBox[2];
-            ClippingInfo(boundingBox);
-            // boundingBox[0] = mins, boundingBox[1] = maxs
-            float modelBottomY = pos[1] + boundingBox[0][1];
+    void CorrectHeight()
+    {
+        vector pos = GetPosition();
+        float surfaceY = GetGame().SurfaceY(pos[0], pos[2]);
 
-            Print("[JSA_Base_2FLift] EEInit pos=" + pos.ToString() + " surfaceY=" + surfaceY + " mins1=" + boundingBox[0][1].ToString() + " bottomY=" + modelBottomY);
+        // Try to get bounding box, use fallback if not available
+        float halfHeight = 3.5; // fallback for ch_b_2f_lift_w_n_p
+        vector boundingBox[2];
+        ClippingInfo(boundingBox);
+        if (boundingBox[0][1] < 0)
+        {
+            halfHeight = -boundingBox[0][1];
+        }
 
-            if (modelBottomY < surfaceY - 0.5)
-            {
-                vector newPos = pos;
-                newPos[1] = surfaceY - boundingBox[0][1];
-                SetPosition(newPos);
-                Print("[JSA_Base_2FLift] Raised to " + newPos.ToString());
-            }
+        float modelBottomY = pos[1] - halfHeight;
+
+        Print("[JSA_Base_2FLift] pos=" + pos.ToString() + " surfaceY=" + surfaceY + " halfH=" + halfHeight + " bottomY=" + modelBottomY);
+
+        if (modelBottomY < surfaceY - 0.5)
+        {
+            vector newPos = pos;
+            newPos[1] = surfaceY + halfHeight;
+            SetPosition(newPos);
+            Print("[JSA_Base_2FLift] Raised to " + newPos.ToString());
         }
     }
 

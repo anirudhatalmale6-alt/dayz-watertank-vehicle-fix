@@ -13,30 +13,35 @@ class JSA_Base_2F : House
 
         if (GetGame().IsServer())
         {
-            // ch_bases models have their origin at the CENTER of the building,
-            // not at the bottom. When placed at terrain level, the bottom half
-            // goes underground. This self-corrects the height on any terrain.
+            // Delay height correction so model geometry is fully loaded
+            GetGame().GetCallQueue(CALL_CATEGORY_SYSTEM).CallLater(CorrectHeight, 500, false);
+        }
+    }
 
-            vector pos = GetPosition();
-            float surfaceY = GetGame().SurfaceY(pos[0], pos[2]);
+    void CorrectHeight()
+    {
+        vector pos = GetPosition();
+        float surfaceY = GetGame().SurfaceY(pos[0], pos[2]);
 
-            // Get model bounding box to find where the bottom is
-            vector boundingBox[2];
-            ClippingInfo(boundingBox);
-            // boundingBox[0] = mins, boundingBox[1] = maxs
-            // mins[1] is negative for center-origin models (distance below origin to bottom)
-            float modelBottomY = pos[1] + boundingBox[0][1];
+        // Try to get bounding box, use fallback if not available
+        float halfHeight = 3.5; // fallback for ch_b_2f_roof_w_n_p
+        vector boundingBox[2];
+        ClippingInfo(boundingBox);
+        if (boundingBox[0][1] < 0)
+        {
+            halfHeight = -boundingBox[0][1];
+        }
 
-            Print("[JSA_Base_2F] EEInit pos=" + pos.ToString() + " surfaceY=" + surfaceY + " mins1=" + boundingBox[0][1].ToString() + " bottomY=" + modelBottomY);
+        float modelBottomY = pos[1] - halfHeight;
 
-            // If the bottom of the building is more than 0.5m below terrain, raise it
-            if (modelBottomY < surfaceY - 0.5)
-            {
-                vector newPos = pos;
-                newPos[1] = surfaceY - boundingBox[0][1]; // raise so bottom sits at terrain
-                SetPosition(newPos);
-                Print("[JSA_Base_2F] Raised to " + newPos.ToString());
-            }
+        Print("[JSA_Base_2F] pos=" + pos.ToString() + " surfaceY=" + surfaceY + " halfH=" + halfHeight + " bottomY=" + modelBottomY);
+
+        if (modelBottomY < surfaceY - 0.5)
+        {
+            vector newPos = pos;
+            newPos[1] = surfaceY + halfHeight;
+            SetPosition(newPos);
+            Print("[JSA_Base_2F] Raised to " + newPos.ToString());
         }
     }
 
