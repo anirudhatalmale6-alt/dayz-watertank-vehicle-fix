@@ -21,19 +21,19 @@ class JSA_Base_2F : House
             float surfaceY = GetGame().SurfaceY(pos[0], pos[2]);
 
             // Get model bounding box to find where the bottom is
-            vector mins, maxs;
-            ClippingInfo(mins, maxs);
-
+            vector boundingBox[2];
+            ClippingInfo(boundingBox);
+            // boundingBox[0] = mins, boundingBox[1] = maxs
             // mins[1] is negative for center-origin models (distance below origin to bottom)
-            float modelBottomY = pos[1] + mins[1];
+            float modelBottomY = pos[1] + boundingBox[0][1];
 
-            Print("[JSA_Base_2F] EEInit pos=" + pos.ToString() + " surfaceY=" + surfaceY + " mins[1]=" + mins[1] + " bottomY=" + modelBottomY);
+            Print("[JSA_Base_2F] EEInit pos=" + pos.ToString() + " surfaceY=" + surfaceY + " mins1=" + boundingBox[0][1].ToString() + " bottomY=" + modelBottomY);
 
             // If the bottom of the building is more than 0.5m below terrain, raise it
             if (modelBottomY < surfaceY - 0.5)
             {
                 vector newPos = pos;
-                newPos[1] = surfaceY - mins[1]; // raise so bottom sits at terrain
+                newPos[1] = surfaceY - boundingBox[0][1]; // raise so bottom sits at terrain
                 SetPosition(newPos);
                 Print("[JSA_Base_2F] Raised to " + newPos.ToString());
             }
