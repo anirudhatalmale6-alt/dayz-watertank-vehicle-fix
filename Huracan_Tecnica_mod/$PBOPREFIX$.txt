@@ -1,0 +1,6 @@
+//<'Huracan_Tecnica.pbo' properties via Mikero's dos tools, dll version 10.14>
+product=dayz ugc;
+version=1;
+prefix=Huracan_Tecnica;
+//PboType=Arma Addon;
+//</properties>
