@@ -75,7 +75,7 @@ class Stage6
 };
 class Stage7
 {
-	texture = "JSA_Clothing_Retextures\data\Woodaxe_jsa_co.paa";
+	texture = "JSA_Tools_Retextures\data\Woodaxe_jsa_co.paa";
 	uvSource = "tex";
 	class uvTransform
 	{
