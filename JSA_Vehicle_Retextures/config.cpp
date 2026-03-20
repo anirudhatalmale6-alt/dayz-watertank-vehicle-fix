@@ -69,14 +69,21 @@ class CfgVehicles
 	class Star_Audi_R8_driver;
 	class Star_Audi_R8_codriver;
 
-	// --- M3 G80 base classes ---
+	// --- M3 G80 base classes (extend from Police variants to inherit model/lightbar) ---
 	class M3_G80: CarScript {};
+	class M3_G80_Police: M3_G80 {};
 	class M3_G80_hood;
 	class M3_G80_trunk;
 	class M3_G80_driver;
 	class M3_G80_codriver;
 	class M3_G80_cargo1;
 	class M3_G80_cargo2;
+	class M3_G80_hood_Police;
+	class M3_G80_trunk_Police;
+	class M3_G80_driver_Police;
+	class M3_G80_codriver_Police;
+	class M3_G80_cargo1_Police;
+	class M3_G80_cargo2_Police;
 
 	// ===========================
 	// JSA GOLDEN SVJ
@@ -166,7 +173,6 @@ class CfgVehicles
 		displayname = "M4W_JSA";
 		hiddenSelections[] = {"light_1_1","light_2_1","light_brake_1_2","light_brake_2_2","light_reverse_1_2","light_reverse_2_2","light_1_2","light_2_2","light_dashboard","camo7"};
 		hiddenSelectionsTextures[] = {"","","","","","","","","","JSA_Vehicle_Retextures\data\M4W\m4wJSA.paa"};
-		hiddenSelectionsMaterials[] = {"","","","","","","","","","m4w\data\glossy.rvmat"};
 	};
 
 	// ===========================
@@ -198,49 +204,46 @@ class CfgVehicles
 		displayname = "R8_Rally_JSA";
 		hiddenSelections[] = {"light_1_1","light_2_1","light_brake_1_2","light_brake_2_2","light_reverse_1_2","light_reverse_2_2","light_1_2","light_2_2","light_dashboard","camo7"};
 		hiddenSelectionsTextures[] = {"","","","","","","","","","JSA_Vehicle_Retextures\data\AudiR8\audir8_JSA_rally.paa"};
-		hiddenSelectionsMaterials[] = {"","","","","","","","","","Star_Audi_R8\data\glossy.rvmat"};
 	};
 
 	// ===========================
 	// JSA M3 ADMIN
+	// (Extends Police variants to inherit model, lightbar, and materials)
 	// ===========================
-	class M3_G80_hood_JSA: M3_G80_hood
-	{
-		hiddenSelections[] = {"camo_door","camo6"};
-		hiddenSelectionsTextures[] = {"JSA_Vehicle_Retextures\data\M3_G80\M3_G80campremap_police2_JSA.paa","M3_G80\data\M3_G80campremap.paa"};
-	};
-	class M3_G80_trunk_JSA: M3_G80_trunk
-	{
-		hiddenSelections[] = {"camo_door","camo6"};
-		hiddenSelectionsTextures[] = {"JSA_Vehicle_Retextures\data\M3_G80\M3_G80campremap_police2_JSA.paa","M3_G80\data\M3_G80campremap.paa"};
-	};
-	class M3_G80_driver_JSA: M3_G80_driver
-	{
-		hiddenSelections[] = {"camo_door","camo6"};
-		hiddenSelectionsTextures[] = {"JSA_Vehicle_Retextures\data\M3_G80\M3_G80campremap_police3_JSA.paa","M3_G80\data\M3_G80campremap.paa"};
-	};
-	class M3_G80_codriver_JSA: M3_G80_codriver
-	{
-		hiddenSelections[] = {"camo_door","camo6"};
-		hiddenSelectionsTextures[] = {"JSA_Vehicle_Retextures\data\M3_G80\M3_G80campremap_police3_JSA.paa","M3_G80\data\M3_G80campremap.paa"};
-	};
-	class M3_G80_cargo1_JSA: M3_G80_cargo1
+	class M3_G80_hood_JSA: M3_G80_hood_Police
 	{
 		hiddenSelections[] = {"camo_door"};
-		hiddenSelectionsTextures[] = {"JSA_Vehicle_Retextures\data\M3_G80\M3_G80campremap_police3_JSA.paa","M3_G80\data\M3_G80campremap.paa"};
+		hiddenSelectionsTextures[] = {"JSA_Vehicle_Retextures\data\M3_G80\M3_G80campremap_police2_JSA.paa"};
 	};
-	class M3_G80_cargo2_JSA: M3_G80_cargo2
+	class M3_G80_trunk_JSA: M3_G80_trunk_Police
 	{
 		hiddenSelections[] = {"camo_door"};
-		hiddenSelectionsTextures[] = {"JSA_Vehicle_Retextures\data\M3_G80\M3_G80campremap_police3_JSA.paa","M3_G80\data\M3_G80campremap.paa"};
+		hiddenSelectionsTextures[] = {"JSA_Vehicle_Retextures\data\M3_G80\M3_G80campremap_police2_JSA.paa"};
 	};
-	class JSA_M3_Admin: M3_G80
+	class M3_G80_driver_JSA: M3_G80_driver_Police
+	{
+		hiddenSelections[] = {"camo_door"};
+		hiddenSelectionsTextures[] = {"JSA_Vehicle_Retextures\data\M3_G80\M3_G80campremap_police3_JSA.paa"};
+	};
+	class M3_G80_codriver_JSA: M3_G80_codriver_Police
+	{
+		hiddenSelections[] = {"camo_door"};
+		hiddenSelectionsTextures[] = {"JSA_Vehicle_Retextures\data\M3_G80\M3_G80campremap_police3_JSA.paa"};
+	};
+	class M3_G80_cargo1_JSA: M3_G80_cargo1_Police
+	{
+		hiddenSelections[] = {"camo_door"};
+		hiddenSelectionsTextures[] = {"JSA_Vehicle_Retextures\data\M3_G80\M3_G80campremap_police3_JSA.paa"};
+	};
+	class M3_G80_cargo2_JSA: M3_G80_cargo2_Police
+	{
+		hiddenSelections[] = {"camo_door"};
+		hiddenSelectionsTextures[] = {"JSA_Vehicle_Retextures\data\M3_G80\M3_G80campremap_police3_JSA.paa"};
+	};
+	class JSA_M3_Admin: M3_G80_Police
 	{
 		scope = 2;
 		displayname = "JSA M3 Admin";
-		model = "M3_G80\M3_G80_Police.p3d";
-		hiddenSelections[] = {"light_1_1","light_2_1","light_brake_1_2","light_brake_2_2","light_reverse_1_2","light_reverse_2_2","light_1_2","light_2_2","light_dashboard","camo7","camo6","lightbar_red","lightbar_blue"};
-		hiddenSelectionsTextures[] = {"","","","","","","","","","JSA_Vehicle_Retextures\data\M3_G80\M3_G80campremap_JSA.paa","","M3_G80\data\policelights\micron_diffuse.paa","M3_G80\data\policelights\micron_diffuse.paa"};
-		hiddenSelectionsMaterials[] = {"","","","","","","","","","M3_G80\data\glossy.rvmat","","M3_G80\data\policelights\lightbar_main.rvmat","M3_G80\data\policelights\lightbar_main.rvmat"};
+		hiddenSelectionsTextures[] = {"","","","","","","","","","JSA_Vehicle_Retextures\data\M3_G80\M3_G80campremap_JSA.paa","","",""};
 	};
 };

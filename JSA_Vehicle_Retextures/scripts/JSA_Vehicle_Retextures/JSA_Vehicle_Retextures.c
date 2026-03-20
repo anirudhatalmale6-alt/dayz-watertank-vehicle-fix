@@ -102,7 +102,7 @@ class R8_Rally_JSA extends Star_Audi_R8
 		Fill( CarFluid.OIL, 4.0 );
 	}
 };
-class JSA_M3_Admin extends M3_G80
+class JSA_M3_Admin extends M3_G80_Police
 {
 	override void OnDebugSpawn()
 	{
