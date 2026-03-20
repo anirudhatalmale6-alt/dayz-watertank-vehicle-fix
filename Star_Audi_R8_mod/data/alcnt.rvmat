@@ -1,0 +1,32 @@
+ambient[]={1,1,1,1};
+diffuse[]={1,1,1,1};
+forcedDiffuse[]={0,0,0,0};
+emmisive[]={0,0,0,1};
+specular[]={0,0,0,0.029999999};
+specularPower=50;
+PixelShaderID="Super";
+VertexShaderID="Super";
+class Stage1
+{
+	texture="Star_Audi_R8\data\r8Alcantara_DFSn.paa";
+	uvSource="tex";
+	class uvTransform
+	{
+		aside[]={1,0,0};
+		up[]={0,1,0};
+		dir[]={0,0,0};
+		pos[]={0,0,0};
+	};
+};
+class Stage6
+{
+	texture="#(ai,64,64,1)fresnel(1.32,0.94)";
+	uvSource="tex";
+	class uvTransform
+	{
+		aside[]={1,0,0};
+		up[]={0,1,0};
+		dir[]={0,0,0};
+		pos[]={0,0,0};
+	};
+};
