@@ -8,6 +8,33 @@ class CfgPatches
 		requiredAddons[] = {"DZ_Vehicles_Wheeled","DZ_Vehicles_Parts","SVJ","Huracan_Tecnica","m4w","Star_Audi_R8","M3_G80"};
 	};
 };
+class CfgMods
+{
+	class JSA_Vehicle_Retextures
+	{
+		dir = "JSA_Vehicle_Retextures";
+		picture = "";
+		action = "";
+		hideName = 1;
+		hidePicture = 1;
+		name = "JSA_Vehicle_Retextures";
+		credits = "";
+		author = "";
+		authorID = "0";
+		version = 1;
+		extra = 0;
+		type = "mod";
+		dependencies[] = {"World"};
+		class defs
+		{
+			class worldScriptModule
+			{
+				value = "";
+				files[] = {"JSA_Vehicle_Retextures\scripts\JSA_Vehicle_Retextures"};
+			};
+		};
+	};
+};
 class CfgVehicles
 {
 	// ===========================
