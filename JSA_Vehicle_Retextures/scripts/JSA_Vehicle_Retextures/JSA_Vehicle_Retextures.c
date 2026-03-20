@@ -102,3 +102,31 @@ class R8_Rally_JSA extends Star_Audi_R8
 		Fill( CarFluid.OIL, 4.0 );
 	}
 };
+class JSA_M3_Admin extends M3_G80
+{
+	override void OnDebugSpawn()
+	{
+		EntityAI entity;
+		if ( Class.CastTo(entity, this) )
+		{
+			entity.GetInventory().CreateInInventory( "CarBattery" );
+			entity.GetInventory().CreateInInventory( "SparkPlug" );
+			entity.GetInventory().CreateInInventory( "CarRadiator" );
+			entity.GetInventory().CreateInInventory( "M3_G80_codriver_JSA" );
+			entity.GetInventory().CreateInInventory( "M3_G80_driver_JSA" );
+			entity.GetInventory().CreateInInventory( "M3_G80_hood_JSA" );
+			entity.GetInventory().CreateInInventory( "M3_G80_trunk_JSA" );
+			entity.GetInventory().CreateInInventory( "M3_G80_cargo1_JSA" );
+			entity.GetInventory().CreateInInventory( "M3_G80_cargo2_JSA" );
+			entity.GetInventory().CreateInInventory( "M3_G80Wheel_offroad" );
+			entity.GetInventory().CreateInInventory( "M3_G80Wheel_offroad" );
+			entity.GetInventory().CreateInInventory( "M3_G80Wheel_offroad" );
+			entity.GetInventory().CreateInInventory( "M3_G80Wheel_offroad" );
+			entity.GetInventory().CreateInInventory( "HeadlightH7" );
+			entity.GetInventory().CreateInInventory( "HeadlightH7" );
+		}
+		Fill( CarFluid.FUEL, 94 );
+		Fill( CarFluid.COOLANT, 6.0 );
+		Fill( CarFluid.OIL, 4.0 );
+	}
+};
